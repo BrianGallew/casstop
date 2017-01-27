@@ -1,0 +1,8 @@
+.idea
+out
+cassandra.logdir_IS_UNDEFINED
+.DS_Store
+*~
+.#*
+build
+.gradle

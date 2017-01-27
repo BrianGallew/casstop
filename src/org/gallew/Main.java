@@ -1,25 +1,29 @@
 package org.gallew;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
-    final Logger logger = LogManager.getLogger(Main.class);
+    final static Logger logger = LoggerFactory.getLogger(Main.class);
     static Cluster cluster;
-
+    static Integer port = 7199;
+    static String host;
     public static void main(String[] args) {
         if (args.length == 1) {
-            cluster = new Cluster(args[0], 7100);
-            System.out.println("Finished");
-
+            host = args[0];
         } else if (args.length == 2) {
-
-            Cluster cluster = new Cluster(args[0], Integer.decode(args[1]));
-            System.out.println("Usage: casstop NODENAME");
+            host = args[0];
+            port = Integer.decode(args[1]);
         } else {
-            System.out.println("Usage: casstop NODENAME");
+            logger.error("Usage: casstop NODENAME [PORT]");
         }
-        cluster.update();
+        cluster = new Cluster(host, port);
+        if (cluster.node_list.size() == 0) {
+            logger.error("Unable to connect to {}:{}", host, port);
+            System.exit(1);
+        }
+        ClusterDisplay display = new ClusterDisplay(cluster);
+        System.exit(0);
     }
 
 }

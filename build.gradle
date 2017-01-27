@@ -1,0 +1,47 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+// Uberjar stuff
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+    }
+}
+apply plugin: 'com.github.johnrengelman.shadow'
+
+// This project was layed out by IntelliJ, so it's not the default setup
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/org']
+        }
+        resources {
+            srcDirs = ['resources/org']
+        }
+    }
+}
+
+
+mainClassName = 'org.gallew.Main'
+
+jar {
+    baseName = 'casstop'
+    version = '1.0.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile "com.googlecode.lanterna:lanterna:3.0.0-beta2"
+    compile "org.slf4j:slf4j-log4j12:1.6.1"
+    runtime "com.googlecode.lanterna:lanterna:3.0.0-beta2"
+    runtime "org.slf4j:slf4j-log4j12:1.6.1"
+}

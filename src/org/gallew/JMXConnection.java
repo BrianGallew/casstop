@@ -12,11 +12,11 @@ import javax.management.remote.JMXServiceURL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JMXConnection {
-    final Logger logger = LogManager.getLogger(JMXConnection.class);
+    final Logger logger = LoggerFactory.getLogger(JMXConnection.class);
     int retries = 2;
     int trial = 0;
     JMXServiceURL url;
