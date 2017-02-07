@@ -29,8 +29,6 @@ public class JMXConnection {
         } catch (java.net.MalformedURLException the_exception) {
             System.out.println("Improperly formed URL: " + the_exception.toString());
             System.exit(1);
-        } catch (java.io.IOException the_exception) {
-            alive = false;
         }
         connect();
     }
@@ -53,6 +51,7 @@ public class JMXConnection {
         try {
             String retval = (String) mbsc.getAttribute(new ObjectName(key), attribute);
             trial = 0;
+            logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
             return retval;
         } catch (Exception the_exception) {
             trial = trial + 1;
@@ -73,6 +72,7 @@ public class JMXConnection {
         try {
             ArrayList retval = (ArrayList) mbsc.getAttribute(new ObjectName(key), attribute);
             trial = 0;
+            logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
             return retval;
         } catch (Exception the_exception) {
             trial = trial + 1;
@@ -93,6 +93,7 @@ public class JMXConnection {
         try {
             Integer retval = (Integer) mbsc.getAttribute(new ObjectName(key), attribute);
             trial = 0;
+            logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
             return retval;
         } catch (Exception the_exception) {
             trial = trial + 1;
@@ -113,6 +114,7 @@ public class JMXConnection {
         try {
             Long retval = (Long) mbsc.getAttribute(new ObjectName(key), attribute);
             trial = 0;
+            logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
             return retval;
         } catch (Exception the_exception) {
             trial = trial + 1;
@@ -133,6 +135,7 @@ public class JMXConnection {
         try {
             Double retval = (Double) mbsc.getAttribute(new ObjectName(key), attribute);
             trial = 0;
+            logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
             return retval;
         } catch (Exception the_exception) {
             trial = trial + 1;

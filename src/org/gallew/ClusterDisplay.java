@@ -48,8 +48,10 @@ public class ClusterDisplay {
                     Character key = keyStroke.getCharacter();
                     if (key != null && key == 'q') break;
                 }
+                cluster.update();
+                summary.update();
                 gui.updateScreen();
-                sleep(50);
+                sleep(5);
             }
         } catch (Exception the_exception)
         {

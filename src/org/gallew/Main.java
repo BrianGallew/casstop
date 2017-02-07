@@ -9,6 +9,7 @@ public class Main {
     static Integer port = 7199;
     static String host;
     public static void main(String[] args) {
+        logger.error("classpath: {}",System.getProperty("java.class.path"));
         if (args.length == 1) {
             host = args[0];
         } else if (args.length == 2) {

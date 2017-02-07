@@ -13,18 +13,18 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.nio.ch.ThreadPool;
 
 import static java.lang.Thread.sleep;
 
 import java.util.Date;
 
-public class Cluster {
+public class Cluster implements Runnable {
     ArrayList<CassandraNode> node_list;
     ArrayList<String> nodes;
     String cassandra_version;
     Integer update_delay = 5;
     ThreadPoolExecutor threadPool = new ThreadPoolExecutor(5, 60, 60, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+    ThreadPoolExecutor mainLoop = new ThreadPoolExecutor(1, 1, 1, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     final Logger logger = LoggerFactory.getLogger(Cluster.class);
 
     Cluster(String start_host, Integer port) {
@@ -45,19 +45,25 @@ public class Cluster {
                 node_list.add(holder);
             } catch (java.io.IOException the_exception) {
                 // it's OK, we don't need to do anything.
-                System.out.println("IO Error on node " + node + ": " + the_exception.toString());
+                logger.debug("IO Error on node " + node + ": " + the_exception.toString());
 
             } catch (java.lang.NullPointerException the_exception) {
                 // it's OK, we don't need to do anything.
-                System.out.println(the_exception);
-                System.out.println("NPE on node " + node + ": " + the_exception.toString());
+                logger.warn("NPE on node {}: {}", node, the_exception.toString());
                 the_exception.printStackTrace(System.out);
             }
         }
-        System.out.println(node_list);
-        System.out.println(cassandra_version);
+        logger.info("Discovered nodes: {}", node_list);
+        logger.info("Cluster cassandra version: {}", cassandra_version);
         update();
         logger.error("done with initial update");
+        //mainLoop.execute(this);
+    }
+
+    public void run() {
+        while (true) {
+            this.update();
+        }
     }
 
     public void update() {
