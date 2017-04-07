@@ -4,6 +4,7 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import java.lang.Math;
 import java.lang.String;
+import org.gallew.Util;
 
 /**
  * Created by begallew on 5/4/16.
@@ -75,9 +76,9 @@ public class SummaryPanel {
         live_nodes.setText(String.valueOf(live_count));
         dead_nodes.setText(String.valueOf(dead_count));
         compactions.setText(String.valueOf(pending_compactions));
-        rrate.setText(String.valueOf(read_rate));
-        rlatency.setText(String.valueOf(read_latency));
-        wrate.setText(String.valueOf(write_rate));
-        wlatency.setText(String.valueOf(write_latency));
+        rrate.setText(Util.Humanize(read_rate));
+        rlatency.setText(Util.Humanize(read_latency, " us"));
+        wrate.setText(Util.Humanize(write_rate));
+        wlatency.setText(Util.Humanize(write_latency, "us"));
     }
 }

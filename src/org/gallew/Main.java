@@ -17,6 +17,8 @@ public class Main {
             port = Integer.decode(args[1]);
         } else {
             logger.error("Usage: casstop NODENAME [PORT]");
+	    System.out.println("Usage: casstop NODENAME [PORT]");
+	    System.exit(1);
         }
         cluster = new Cluster(host, port);
         if (cluster.node_list.size() == 0) {

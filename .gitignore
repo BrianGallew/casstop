@@ -6,3 +6,5 @@ cassandra.logdir_IS_UNDEFINED
 .#*
 build
 .gradle
+blah
+casstop.log
