@@ -56,7 +56,7 @@ public class Cluster  {
         logger.info("Discovered nodes: {}", node_list);
         logger.info("Cluster cassandra version: {}", cassandra_version);
         update();
-        logger.error("done with initial update");
+        logger.debug("done with initial update");
     }
 
 

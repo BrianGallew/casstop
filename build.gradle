@@ -17,7 +17,7 @@ sourceSets {
 }
 
 
-mainClassName = 'org.gallew.casstop.Main'
+mainClassName = 'org.gallew.casstop.Casstop'
 
 jar {
     baseName = 'casstop'
