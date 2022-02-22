@@ -1,10 +1,10 @@
-package org.gallew;
+package org.gallew.casstop;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import java.lang.Math;
 import java.lang.String;
-import org.gallew.Util;
+import org.gallew.casstop.Util;
 
 /**
  * Created by begallew on 5/4/16.

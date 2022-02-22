@@ -1,16 +1,8 @@
-apply plugin: 'java'
-apply plugin: 'application'
-
-// Uberjar stuff
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
-    }
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
-apply plugin: 'com.github.johnrengelman.shadow'
 
 // This project was layed out by IntelliJ, so it's not the default setup
 sourceSets {
@@ -25,7 +17,7 @@ sourceSets {
 }
 
 
-mainClassName = 'org.gallew.Main'
+mainClassName = 'org.gallew.casstop.Main'
 
 jar {
     baseName = 'casstop'
@@ -40,8 +32,6 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile "com.googlecode.lanterna:lanterna:3.0.0-beta2"
-    compile "ch.qos.logback:logback-classic:1.0.13"
-    runtime "com.googlecode.lanterna:lanterna:3.0.0-beta2"
-    runtime "ch.qos.logback:logback-classic:1.0.13"
+    implementation "com.googlecode.lanterna:lanterna:3.1.1"
+    implementation "ch.qos.logback:logback-classic:1.2.10"
 }

@@ -1,4 +1,4 @@
-package org.gallew;
+package org.gallew.casstop;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,13 +10,15 @@ public class Main {
     static String host;
     public static void main(String[] args) {
         logger.error("classpath: {}",System.getProperty("java.class.path"));
-        if (args.length == 1) {
-            host = args[0];
-        } else if (args.length == 2) {
-            host = args[0];
-            port = Integer.decode(args[1]);
+        if (args.length == 2) {
+            host = args[1];
+            logger.debug("selected node {}:{}", host, port);
+        } else if (args.length == 3) {
+            host = args[1];
+            port = Integer.decode(args[2]);
+            logger.debug("Selected {}:{}", host, port);
         } else {
-            logger.error("Usage: casstop NODENAME [PORT]");
+            logger.error("args.length {}", args.length);
 	    System.out.println("Usage: casstop NODENAME [PORT]");
 	    System.exit(1);
         }

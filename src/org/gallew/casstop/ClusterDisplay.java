@@ -1,4 +1,4 @@
-package org.gallew;
+package org.gallew.casstop;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
