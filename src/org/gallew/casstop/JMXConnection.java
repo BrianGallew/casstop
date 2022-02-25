@@ -6,11 +6,14 @@ package org.gallew.casstop;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,22 +133,64 @@ public class JMXConnection {
     @SuppressWarnings("unchecked")
     public Double getDouble(String key, String attribute) {
         // Extract/return a Double attribute.
-        if (!alive) return 0.0;
-
-        try {
-            Double retval = (Double) mbsc.getAttribute(new ObjectName(key), attribute);
-            trial = 0;
-            logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
-            return retval;
-        } catch (Exception the_exception) {
-            trial = trial + 1;
-            if (trial < retries) {
-                connect();
-                return getDouble(key, attribute);
+        Double retval = 0.0;
+        if (alive) {
+            try {
+                retval = (Double) mbsc.getAttribute(new ObjectName(key), attribute);
+                trial = 0;
+                logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
+            } catch (Exception the_exception) {
+                trial = trial + 1;
+                if (trial < retries) {
+                    connect();
+                    return getDouble(key, attribute);
+                }
+                logger.error("Error reading bean {}: {}", key, the_exception);
             }
-            logger.error("Error reading bean {}: {}", key, the_exception);
         }
-        return 0.0;
+        return retval;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Set getSet(String key, String attribute) {
+        // Extract/return a Double attribute.
+        HashSet retval = new HashSet();
+        if (alive) {
+            try {
+                retval = (HashSet) mbsc.getAttribute(new ObjectName(key), attribute);
+                trial = 0;
+                logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
+            } catch (Exception the_exception) {
+                trial = trial + 1;
+                if (trial < retries) {
+                    connect();
+                    return getSet(key, attribute);
+                }
+                logger.error("Error reading bean {}: {}", key, the_exception);
+            }
+        }
+        return retval;
+    }
+
+    @SuppressWarnings("unchecked")
+    public TabularData getTabularData(String key, String attribute) {
+        // Extract/return a Double attribute.
+        TabularData retval = null;
+        if (alive) {
+            try {
+                retval = (TabularData) mbsc.getAttribute(new ObjectName(key), attribute);
+                trial = 0;
+                logger.debug("{}:{}:{} == {}", url, key, attribute, retval);
+            } catch (Exception the_exception) {
+                trial = trial + 1;
+                if (trial < retries) {
+                    connect();
+                    return getTabularData(key, attribute);
+                }
+                logger.error("Error reading bean {}: {}", key, the_exception);
+            }
+        }
+        return retval;
     }
 
 }

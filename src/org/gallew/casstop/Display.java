@@ -17,22 +17,22 @@ import static java.lang.Thread.sleep;
 /**
  * Created by begallew on 5/3/16.
  */
-public class ClusterDisplay {
+public class Display {
     SummaryPanel summary;
     Terminal terminal;
     Screen screen;
     BasicWindow window;
     MultiWindowTextGUI gui;
-    final Logger logger = LoggerFactory.getLogger(ClusterDisplay.class);
+    final Logger logger = LoggerFactory.getLogger(Display.class);
 
-    ClusterDisplay(Cluster cluster) {
+    Display(CassandraNode node) {
         try {
             terminal = new DefaultTerminalFactory().createTerminal();
 
             screen = new TerminalScreen(terminal);
             screen.startScreen();
             // Create panel to hold components
-            summary = new SummaryPanel(cluster);
+            summary = new SummaryPanel(node);
 
             // Create window to hold the panel
             window = new BasicWindow();
@@ -48,7 +48,7 @@ public class ClusterDisplay {
                     Character key = keyStroke.getCharacter();
                     if (key != null && key == 'q') break;
                 }
-                cluster.update();
+                node.update();
                 summary.update();
                 gui.updateScreen();
                 sleep(5);

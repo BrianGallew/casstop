@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class Casstop {
     final static Logger logger = LoggerFactory.getLogger(Casstop.class);
-    static Cluster cluster;
+    static CassandraNode node;
     static Integer port = 7199;
     static String host = "localhost";
     public static void main(String[] args) {
@@ -22,13 +22,19 @@ public class Casstop {
 	    System.out.println("Usage: casstop NODENAME [PORT]");
 	    System.exit(1);
         }
-        cluster = new Cluster(host, port);
-        if (cluster.node_list.size() == 0) {
-            System.out.printf("Unable to connect to %s:%s\n", host, port);
-            logger.error("Unable to connect to {}:{}", host, port);
-            System.exit(1);
-        }
-        ClusterDisplay display = new ClusterDisplay(cluster);
+        try {
+            node = new CassandraNode(host, port);
+            logger.debug("Got a {} for {}", node, host);
+        } catch (java.io.IOException the_exception) {
+            logger.error("IO Error on node " + node + ": " + the_exception.toString());
+	    System.exit(2);
+        } catch (java.lang.NullPointerException the_exception) {
+            // it's OK, we don't need to do anything.
+            logger.error("NPE on node {}: {}", host, the_exception.toString());
+            the_exception.printStackTrace(System.out);
+	    System.exit(3);
+            }
+        Display display = new Display(node);
         System.exit(0);
     }
 

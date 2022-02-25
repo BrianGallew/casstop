@@ -18,10 +18,10 @@ public class SummaryPanel {
     Label rlatency = new Label("");
     Label wrate = new Label("");
     Label wlatency = new Label("");
-    Cluster my_cluster;
+    CassandraNode node;
 
-    SummaryPanel(Cluster cluster) {
-        my_cluster = cluster;
+    SummaryPanel(CassandraNode the_node) {
+        node = the_node;
         summary.setPreferredSize(new TerminalSize(80, 4));
 
         summary.setLayoutManager(new GridLayout(8));
@@ -61,24 +61,25 @@ public class SummaryPanel {
         double read_latency = 0.0;
         double write_rate = 0.0;
         double write_latency = 0.0;
-        for (CassandraNode node : my_cluster.node_list) {
-            if (node.conn.alive) {
-                live_count += 1;
-            } else {
-                dead_count += 1;
-            }
+        if (node.conn.alive) {
+            live_count += 1;
+        } else {
+            dead_count += 1;
+        }
+        if (node.metrics != null) {
             pending_compactions += node.metrics.pendingTasks;
             read_rate += node.metrics.readLatencyOneMinute;
             read_latency = Math.max(read_latency, node.metrics.readLatency);
             write_rate += node.metrics.writeLatencyOneMinute;
             write_latency = Math.max(write_latency, node.metrics.writeLatency);
+
+            live_nodes.setText(String.valueOf(live_count));
+            dead_nodes.setText(String.valueOf(dead_count));
+            compactions.setText(String.valueOf(pending_compactions));
+            rrate.setText(Util.Humanize(read_rate));
+            rlatency.setText(Util.Humanize(read_latency, " us"));
+            wrate.setText(Util.Humanize(write_rate));
+            wlatency.setText(Util.Humanize(write_latency, "us"));
         }
-        live_nodes.setText(String.valueOf(live_count));
-        dead_nodes.setText(String.valueOf(dead_count));
-        compactions.setText(String.valueOf(pending_compactions));
-        rrate.setText(Util.Humanize(read_rate));
-        rlatency.setText(Util.Humanize(read_latency, " us"));
-        wrate.setText(Util.Humanize(write_rate));
-        wlatency.setText(Util.Humanize(write_latency, "us"));
     }
 }
