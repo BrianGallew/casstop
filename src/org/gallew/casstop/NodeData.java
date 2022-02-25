@@ -4,7 +4,7 @@ import java.util.Set;
 import javax.management.openmbean.TabularData;
 
 /**
- * Created by begallew on 5/4/16.
+ * Extracts data via JMX.
  */
 public class NodeData {
     public Long load = 0L;
@@ -18,6 +18,8 @@ public class NodeData {
     public Double writeLatencyOneMinute = 0.0;
     public Set current_streams;
     public TabularData compaction_history;
+    public Integer nodesUp = 0;
+    public Integer nodesDown = 0;
 
     public NodeData(JMXConnection conn) throws java.io.IOException {
 
@@ -32,5 +34,7 @@ public class NodeData {
         writeLatencyOneMinute = conn.getDouble("org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency","OneMinuteRate");
         current_streams = conn.getSet("org.apache.cassandra.net:type=StreamManager","CurrentStreams");
         compaction_history = conn.getTabularData("org.apache.cassandra.db:type=CompactionManager","CompactionHistory");
+        nodesUp = conn.getInteger("org.apache.cassandra.net:type=FailureDetector", "UpEndpointCount");
+        nodesDown = conn.getInteger("org.apache.cassandra.net:type=FailureDetector", "DownEndpointCount");
     }
 }

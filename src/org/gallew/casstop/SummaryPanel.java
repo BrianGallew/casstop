@@ -4,12 +4,18 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import java.lang.Math;
 import java.lang.String;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import org.gallew.casstop.Util;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Created by begallew on 5/4/16.
  */
 public class SummaryPanel {
+    final Logger logger = LoggerFactory.getLogger(SummaryPanel.class);
+    Label title = new Label("");
     Panel summary = new Panel();
     Label live_nodes = new Label("");
     Label dead_nodes = new Label("");
@@ -19,12 +25,16 @@ public class SummaryPanel {
     Label wrate = new Label("");
     Label wlatency = new Label("");
     CassandraNode node;
+    DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     SummaryPanel(CassandraNode the_node) {
         node = the_node;
-        summary.setPreferredSize(new TerminalSize(80, 4));
+        // summary.setPreferredSize(new TerminalSize(80, 4));
 
-        summary.setLayoutManager(new GridLayout(8));
+        summary.setLayoutManager(new LinearLayout());
+        summary.addComponent(title);
+
+        summary.addComponent(new EmptySpace(new TerminalSize(0, 0)));
 
         summary.addComponent(new Label("Live Nodes"));
         summary.addComponent(live_nodes);
@@ -54,6 +64,10 @@ public class SummaryPanel {
     }
 
     public void update() {
+        if (!node.update()) {
+            return;
+        }
+        update_title();
         int live_count = 0;
         int dead_count = 0;
         int pending_compactions = 0;
@@ -81,5 +95,25 @@ public class SummaryPanel {
             wrate.setText(Util.Humanize(write_rate));
             wlatency.setText(Util.Humanize(write_latency, "us"));
         }
+    }
+
+    private void update_title() {
+        Integer nodesUp = 0;
+        Integer nodesDown = 0;
+        if (node.metrics != null) {
+            nodesUp = node.metrics.nodesUp;
+            nodesDown = node.metrics.nodesDown;
+        }
+        title.setText(String.format("%s:%s(%s)  %s  Up: %d  Down: %d   Last Update: %s",
+                                    node.nodename, node.cluster_name, node.cassandra_version,
+                                    node.metrics.status, nodesUp, nodesDown,
+                                    LocalTime.now().format(timeFormatter)));
+        logger.debug("Updated time to {}", LocalTime.now().format(timeFormatter));
+    }
+
+    public void text_output(Integer rows, Integer columns) {
+        System.out.println(title.getText());
+        System.out.println(String.format("Rows: %d, Columns: %d", rows, columns));
+        System.out.println("End of line.");
     }
 }

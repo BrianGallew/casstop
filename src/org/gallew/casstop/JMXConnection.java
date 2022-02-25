@@ -26,9 +26,11 @@ public class JMXConnection {
     MBeanServerConnection mbsc;
     boolean alive = true;
 
-    JMXConnection(String host, Integer port) {
+    JMXConnection(String host, String port) {
         try {
-            url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port.toString() + "/jmxrmi");
+            String uri = "service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi";
+            logger.debug("Making JMX connection to {}", uri);
+            url = new JMXServiceURL(uri);
         } catch (java.net.MalformedURLException the_exception) {
             System.out.println("Improperly formed URL: " + the_exception.toString());
             System.exit(1);

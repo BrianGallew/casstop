@@ -9,27 +9,33 @@ public class CassandraNode {
     final Logger logger = LoggerFactory.getLogger(CassandraNode.class);
     JMXConnection conn;
     String nodename;
-    Integer port;
+    String port;
     // Metrics
-    Integer live_nodes;
     String cassandra_version;
     String cluster_name;
-    long update_delay_in_ms = 5000; // Wire in a way to change this?
-    long last_update = new Date().getTime() - 5000;
+    long update_delay_in_ms;
+    long last_update;
     NodeData metrics;
 
-    public CassandraNode(String new_nodename, Integer new_port) throws java.io.IOException {
-        nodename = new_nodename;
-        port = new_port;
-        conn = new JMXConnection(new_nodename, new_port);
+
+    public CassandraNode(Config config) throws java.io.IOException {
+        nodename = config.nodename;
+        port = config.port;
+        update_delay_in_ms = config.update_delay;
+        last_update = new Date().getTime() - update_delay_in_ms;
+        conn = new JMXConnection(nodename, port);
+        if (!conn.alive) {
+            logger.error("Unable to make JMX connection to {}:{}", config.nodename, config.port);
+            System.exit(4);
+        }
         cassandra_version = conn.getString("org.apache.cassandra.db:type=StorageService", "ReleaseVersion");
         cluster_name = conn.getString("org.apache.cassandra.db:type=StorageService", "ClusterName");
     }
 
-    public void update() {
+    public boolean update() {
         long start_time = new Date().getTime();
         if ((start_time-last_update) < update_delay_in_ms) {
-            return;
+            return false;
         }
         logger.info("attempting update");
         if (!conn.alive) {      // Ensure we didn't lose our connection while sleeping
@@ -38,7 +44,7 @@ public class CassandraNode {
         try {
             metrics = new NodeData(conn);
         } catch (java.io.IOException the_exception) {
-            return;
+            return false;
         }
             
         if (conn.alive) {       // Can happen for many reasons
@@ -48,5 +54,6 @@ public class CassandraNode {
 
         }
         last_update = start_time;
+        return true;
     }
 }

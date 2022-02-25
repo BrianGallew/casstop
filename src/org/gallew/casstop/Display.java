@@ -36,7 +36,7 @@ public class Display {
 
             // Create window to hold the panel
             window = new BasicWindow();
-            window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN));
+            window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN, Window.Hint.FIT_TERMINAL_WINDOW));
             window.setComponent(summary.summary);
             // Create gui and start gui
             gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLUE));
@@ -48,11 +48,16 @@ public class Display {
                     Character key = keyStroke.getCharacter();
                     if (key != null && key == 'q') break;
                 }
-                node.update();
                 summary.update();
                 gui.updateScreen();
-                sleep(5);
+                sleep(10);
             }
+            TerminalSize tsize = terminal.getTerminalSize();
+            screen.clear();
+            screen.refresh();
+            screen.stopScreen();
+            sleep(10);
+            summary.text_output(tsize.getRows(), tsize.getColumns());
         } catch (Exception the_exception)
         {
             logger.error("Exception building GUI: {}", the_exception);
