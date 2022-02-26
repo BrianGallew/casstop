@@ -15,17 +15,12 @@ import org.slf4j.Logger;
  */
 public class SummaryPanel {
     final Logger logger = LoggerFactory.getLogger(SummaryPanel.class);
-    Label title = new Label("");
     Panel summary = new Panel();
-    Label live_nodes = new Label("");
-    Label dead_nodes = new Label("");
-    Label compactions = new Label("");
-    Label rrate = new Label("");
-    Label rlatency = new Label("");
-    Label wrate = new Label("");
-    Label wlatency = new Label("");
+    Label title = new Label("");
+    Label rates = new Label("");
     CassandraNode node;
     DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    TerminalSize size;
 
     SummaryPanel(CassandraNode the_node) {
         node = the_node;
@@ -33,69 +28,32 @@ public class SummaryPanel {
 
         summary.setLayoutManager(new LinearLayout());
         summary.addComponent(title);
-
-        summary.addComponent(new EmptySpace(new TerminalSize(0, 0)));
-
-        summary.addComponent(new Label("Live Nodes"));
-        summary.addComponent(live_nodes);
-
-        summary.addComponent(new Label("Compactions"));
-        summary.addComponent(compactions);
-
-        summary.addComponent(new Label("Rrate"));
-        summary.addComponent(rrate);
-
-        summary.addComponent(new Label("Rlatency"));
-        summary.addComponent(rlatency);
-
-
-        summary.addComponent(new Label("Dead Nodes"));
-        summary.addComponent(dead_nodes);
-
+        summary.addComponent(rates);
         summary.addComponent(new EmptySpace(new TerminalSize(0, 0)));
         summary.addComponent(new EmptySpace(new TerminalSize(0, 0)));
-
-        summary.addComponent(new Label("Wrate"));
-        summary.addComponent(wrate);
-
-        summary.addComponent(new Label("Wlatency"));
-        summary.addComponent(wlatency);
         update();
     }
 
     public void update() {
-        if (!node.update()) {
+        if (!node.update() || node.metrics == null) {
             return;
         }
+        size = summary.getSize();
         update_title();
-        int live_count = 0;
-        int dead_count = 0;
-        int pending_compactions = 0;
-        double read_rate = 0.0;
-        double read_latency = 0.0;
-        double write_rate = 0.0;
-        double write_latency = 0.0;
-        if (node.conn.alive) {
-            live_count += 1;
-        } else {
-            dead_count += 1;
-        }
-        if (node.metrics != null) {
-            pending_compactions += node.metrics.pendingTasks;
-            read_rate += node.metrics.readLatencyOneMinute;
-            read_latency = Math.max(read_latency, node.metrics.readLatency);
-            write_rate += node.metrics.writeLatencyOneMinute;
-            write_latency = Math.max(write_latency, node.metrics.writeLatency);
-
-            live_nodes.setText(String.valueOf(live_count));
-            dead_nodes.setText(String.valueOf(dead_count));
-            compactions.setText(String.valueOf(pending_compactions));
-            rrate.setText(Util.Humanize(read_rate));
-            rlatency.setText(Util.Humanize(read_latency, " us"));
-            wrate.setText(Util.Humanize(write_rate));
-            wlatency.setText(Util.Humanize(write_latency, "us"));
-        }
+        update_rates();
     }
+
+    private void optimize_label(Label label, String[] text) {
+        Integer width = size.getColumns();
+        Integer textWidthSummary = 0;
+        for (String substring : text) {
+            textWidthSummary += substring.length();
+        }
+        Integer separatorWidth = Math.max(3, (width - textWidthSummary) / (text.length - 1));
+        String separator = String.format(String.format("%%%ds", separatorWidth), "");
+        label.setText(String.join(separator, text));
+    }
+    
 
     private void update_title() {
         Integer nodesUp = 0;
@@ -104,16 +62,32 @@ public class SummaryPanel {
             nodesUp = node.metrics.nodesUp;
             nodesDown = node.metrics.nodesDown;
         }
-        title.setText(String.format("%s:%s(%s)  %s  Up: %d  Down: %d   Last Update: %s",
-                                    node.nodename, node.cluster_name, node.cassandra_version,
-                                    node.metrics.status, nodesUp, nodesDown,
-                                    LocalTime.now().format(timeFormatter)));
+        String[] parts = {
+            String.format("%s:%s(%s)", node.nodename, node.cluster_name, node.cassandra_version),
+            node.metrics.status,
+            String.format("Up: %d  Down: %d",nodesUp, nodesDown),
+            String.format("Last Update: %s", LocalTime.now().format(timeFormatter))};
+        optimize_label(title, parts);
         logger.debug("Updated time to {}", LocalTime.now().format(timeFormatter));
+    }
+
+    private void update_rates() {
+        String[] parts = {
+            String.format("Reads %s/s latency %s",
+                          Util.Humanize(node.metrics.readLatencyOneMinute),
+                          Util.Humanize(node.metrics.readLatency)),
+            String.format("Writes %s/s  latency %s",
+                          Util.Humanize(node.metrics.writeLatencyOneMinute),
+                          Util.Humanize(node.metrics.writeLatency)),
+            String.format("Pending Tasks: %d", node.metrics.pendingTasks)
+        };
+        optimize_label(rates, parts);
     }
 
     public void text_output(Integer rows, Integer columns) {
         System.out.println(title.getText());
-        System.out.println(String.format("Rows: %d, Columns: %d", rows, columns));
-        System.out.println("End of line.");
+        System.out.println(rates.getText());
+        System.out.println("Rows: " + size.getRows());
+        System.out.println("Columns: " + size.getColumns());
     }
 }
