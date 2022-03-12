@@ -19,16 +19,28 @@ public class FullWidthPanel extends Panel {
     DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     TerminalSize size;
     Integer rows = 2;
-
-    FullWidthPanel(CassandraNode the_node) {
+    String title = "FullWidthPanel";
+    
+    FullWidthPanel(CassandraNode the_node, Integer columns) {
         super();
         node = the_node;
         setLayoutManager(new LinearLayout());
+        size = new TerminalSize(columns, rows);
+        setPreferredSize(size);
     }
 
     public void update() {
-        size = getParent().getSize();
-        setPreferredSize(size.withRows(rows));
+        size = getParent().getSize().withRows(rows);
+        if (size.getColumns() == 0)
+            return;
+        size = size.withColumns(size.getColumns() -2);
+        TerminalSize oldSize = getSize();
+        if (size.getColumns() != oldSize.getColumns()) {
+            logger.info("Setting size to: {}x{} from {}x{}",
+                        size.getColumns(), size.getRows(),
+                        oldSize.getColumns(), oldSize.getRows());
+            setPreferredSize(size.withRows(rows));
+        }
         return;
     }
 
@@ -41,6 +53,10 @@ public class FullWidthPanel extends Panel {
         Integer separatorWidth = Math.max(3, (width - textWidthSummary) / (text.length - 1));
         String separator = String.format(String.format(" %%%ds", separatorWidth), "");
         label.setText(String.join(separator, text));
+    }
+
+    public void text_output(Integer rows, Integer columns) {
+
     }
     
 }

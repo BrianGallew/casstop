@@ -11,6 +11,8 @@ public class Casstop {
         try {
             node = new CassandraNode(config);
             logger.debug("Got a {} for {}", node, config.nodename);
+            MyGui display = new MyGui(node);
+            display.loop();
         } catch (java.io.IOException the_exception) {
             logger.error("IO Error on node " + config.nodename + ": " + the_exception.toString());
 	    System.exit(2);
@@ -19,8 +21,11 @@ public class Casstop {
             logger.error("NPE on node {}: {}", config.nodename, the_exception.toString());
             the_exception.printStackTrace(System.out);
 	    System.exit(3);
-            }
-        Display display = new Display(node);
+        } catch (java.lang.InterruptedException the_exception) {
+            logger.error("InterruptedException on node {}: {}", config.nodename, the_exception.toString());
+            the_exception.printStackTrace(System.out);
+	    System.exit(4);
+        }
         System.exit(0);
     }
 

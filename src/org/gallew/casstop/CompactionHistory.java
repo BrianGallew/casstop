@@ -15,8 +15,8 @@ public class CompactionHistory extends FullWidthPanel {
     Label title = new Label("");
     Label rates = new Label("");
 
-    CompactionHistory(CassandraNode the_node) {
-        super(the_node);
+    CompactionHistory(CassandraNode the_node, Integer columns) {
+        super(the_node, columns);
         addComponent(title);
         addComponent(rates);
     }
