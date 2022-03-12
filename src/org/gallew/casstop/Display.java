@@ -18,44 +18,65 @@ import static java.lang.Thread.sleep;
  * Created by begallew on 5/3/16.
  */
 public class Display {
-    SummaryPanel summary;
-    Terminal terminal;
     Screen screen;
     BasicWindow window;
+    TerminalSize tsize;
     MultiWindowTextGUI gui;
     final Logger logger = LoggerFactory.getLogger(Display.class);
 
     Display(CassandraNode node) {
         try {
-            terminal = new DefaultTerminalFactory().createTerminal();
 
-            screen = new TerminalScreen(terminal);
+            screen = new DefaultTerminalFactory().createScreen();
             screen.startScreen();
-            // Create panel to hold components
-            summary = new SummaryPanel(node);
-
+            screen.clear();
+            screen.refresh();
+            screen.doResizeIfNecessary();
             // Create window to hold the panel
             window = new BasicWindow();
-            window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN, Window.Hint.FIT_TERMINAL_WINDOW));
-            window.setComponent(summary.summary);
-            // Create gui and start gui
-            gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLUE));
+            window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN,
+                                          Window.Hint.FIT_TERMINAL_WINDOW,
+                                          Window.Hint.NO_DECORATIONS));
+
+            // Create gui
+            // gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLUE));
+            gui = new MultiWindowTextGUI(new SeparateTextGUIThread.Factory(), screen, new DefaultWindowManager());
             gui.addWindow(window);
-            gui.updateScreen();
+            ((AsynchronousTextGUIThread)gui.getGUIThread()).start();
+            // Create panel to hold components
+            Panel canvas = new Panel();
+            canvas.setLayoutManager(new LinearLayout());
+            window.setComponent(canvas);
+            
+            // Add the various sections
+            node.update();
+            SummaryPanel summary = new SummaryPanel(node);
+            CompactionStats compactionstats = new CompactionStats(node);
+            CompactionHistory compactionhistory = new CompactionHistory(node);
+            canvas.addComponent(summary.withBorder(Borders.singleLine("Summary")));
+            canvas.addComponent(compactionhistory.withBorder(Borders.singleLine("Compaction History")));
+            canvas.addComponent(compactionstats.withBorder(Borders.singleLine("Compaction Stats")));
+            // Start gui
             while (true) {
+                gui.processInput();
                 KeyStroke keyStroke = screen.pollInput();
                 if (keyStroke != null) {
                     Character key = keyStroke.getCharacter();
-                    if (key != null && key == 'q') break;
+                    if (key != null && key == 'q') {
+                        ((AsynchronousTextGUIThread)gui.getGUIThread()).stop();
+                        break;
+                    }
                 }
                 summary.update();
-                gui.updateScreen();
+                compactionstats.update();
+                compactionhistory.update();
                 sleep(10);
             }
-            TerminalSize tsize = terminal.getTerminalSize();
+            tsize = screen.getTerminalSize();
             screen.clear();
             screen.refresh();
             screen.stopScreen();
+            ((AsynchronousTextGUIThread)gui.getGUIThread()).stop();
             sleep(10);
             summary.text_output(tsize.getRows(), tsize.getColumns());
         } catch (Exception the_exception)

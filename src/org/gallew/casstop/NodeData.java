@@ -1,5 +1,7 @@
 package org.gallew.casstop;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import javax.management.openmbean.TabularData;
 
@@ -17,9 +19,11 @@ public class NodeData {
     public Double writeLatency = 0.0;
     public Double writeLatencyOneMinute = 0.0;
     public Set current_streams;
-    public TabularData compaction_history;
     public Integer nodesUp = 0;
     public Integer nodesDown = 0;
+    public TabularData compaction_history;
+    public ArrayList compaction_summary;
+    public ArrayList compactions;
 
     public NodeData(JMXConnection conn) throws java.io.IOException {
 
@@ -28,13 +32,17 @@ public class NodeData {
         totalHints = conn.getLong("org.apache.cassandra.metrics:type=Storage,name=TotalHints", "Count");
         totalHintsInProgress = conn.getLong("org.apache.cassandra.metrics:type=Storage,name=TotalHintsInProgress", "Count");
         pendingTasks = conn.getInteger("org.apache.cassandra.metrics:type=Compaction,name=PendingTasks", "Value");
-        readLatency = conn.getDouble("org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency","75thPercentile");
-        readLatencyOneMinute = conn.getDouble("org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency","OneMinuteRate");
+        readLatency  = conn.getDouble("org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency","75thPercentile");
         writeLatency = conn.getDouble("org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency","75thPercentile");
+        readLatencyOneMinute  = conn.getDouble("org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency","OneMinuteRate");
         writeLatencyOneMinute = conn.getDouble("org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency","OneMinuteRate");
-        current_streams = conn.getSet("org.apache.cassandra.net:type=StreamManager","CurrentStreams");
-        compaction_history = conn.getTabularData("org.apache.cassandra.db:type=CompactionManager","CompactionHistory");
         nodesUp = conn.getInteger("org.apache.cassandra.net:type=FailureDetector", "UpEndpointCount");
         nodesDown = conn.getInteger("org.apache.cassandra.net:type=FailureDetector", "DownEndpointCount");
+        current_streams = conn.getSet("org.apache.cassandra.net:type=StreamManager","CurrentStreams");
+        compaction_summary = conn.getList("org.apache.cassandra.db:type=CompactionManager","CompactionSummary");
+        // Compaction@23688c90-9768-11ec-93db-11ffd(keyspace1, standard1, 111357/427817883)bytes
+        compactions = conn.getList("org.apache.cassandra.db:type=CompactionManager","Compactions");
+        // {keyspace=keyspace1, total=427817883, taskType=Compaction, unit=bytes, id=23688c90-9768-11ec-93db-11ffd, completed=111357, compactionId=23688c90-9768-11ec-93db-11ffd, columnfamily=standard1}
+        compaction_history = conn.getTabularData("org.apache.cassandra.db:type=CompactionManager","CompactionHistory");
     }
 }

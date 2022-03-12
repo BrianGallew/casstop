@@ -10,15 +10,12 @@ import org.gallew.casstop.Util;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-/**
- * Created by begallew on 5/4/16.
- */
-public class SummaryPanel extends FullWidthPanel {
-    final Logger logger = LoggerFactory.getLogger(SummaryPanel.class);
+public class CompactionHistory extends FullWidthPanel {
+    final Logger logger = LoggerFactory.getLogger(CompactionHistory.class);
     Label title = new Label("");
     Label rates = new Label("");
 
-    SummaryPanel(CassandraNode the_node) {
+    CompactionHistory(CassandraNode the_node) {
         super(the_node);
         addComponent(title);
         addComponent(rates);
