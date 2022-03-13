@@ -68,23 +68,33 @@ public class FullWidthPanel extends Panel {
         label.setText(String.join(separator, text));
     }
 
-    public void text_output(Integer rows, Integer columns) {}
+    public void text_output(Integer rows, Integer columns) {
+        if (data != null) {
+            System.out.println();
+            for ( String str : data ) 
+                System.out.println(str);
+        }
+    }
+
     public void update_data() {}
+
     public void display_data() {
         Component target;
         Component parent = getParent();
+        removeAllComponents();
+        // Find the component to make invisible.  If we were wrapped with a Border, use the Border.
         if (borderClass.isInstance(parent)) {
             target = (Component)parent;
         } else {
             target = (Component)this;
         }
+        // No data?  Don't display anything, including the bounding box
         if (data.size() == 0) {
             target.setVisible(false);
             return;
         } else {
             target.setVisible(true);
         }
-        removeAllComponents();
         for (String line : data) {
             addComponent(new Label(line));
         }

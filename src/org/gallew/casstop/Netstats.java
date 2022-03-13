@@ -30,9 +30,4 @@ public class Netstats extends FullWidthPanel {
         data.clear();
         toggle = 0;
     }
-
-    public void text_output(Integer rows, Integer columns) {
-        for ( String str : data ) 
-            System.out.println(str);
-    }
 }
