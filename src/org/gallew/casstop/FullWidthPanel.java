@@ -2,10 +2,12 @@ package org.gallew.casstop;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
+import java.lang.Class;
 import java.lang.Math;
 import java.lang.String;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import org.gallew.casstop.Util;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -20,9 +22,17 @@ public class FullWidthPanel extends Panel {
     TerminalSize size;
     Integer rows = 2;
     String title = "FullWidthPanel";
+    ArrayList<String> data;
+    Class borderClass;
     
     FullWidthPanel(CassandraNode the_node, Integer columns) {
         super();
+        try {
+            borderClass = Class.forName("com.googlecode.lanterna.gui2.Border");
+        } catch (ClassNotFoundException the_exception) {
+            logger.error("WTH: {}", the_exception);
+            System.exit(-99);
+        }
         node = the_node;
         setLayoutManager(new LinearLayout());
         size = new TerminalSize(columns, rows);
@@ -30,17 +40,20 @@ public class FullWidthPanel extends Panel {
     }
 
     public void update() {
+        if (data != null) {
+            update_data();
+            display_data();
+            rows = data.size();
+        }
         size = getParent().getSize().withRows(rows);
         if (size.getColumns() == 0)
             return;
         size = size.withColumns(size.getColumns() -2);
         TerminalSize oldSize = getSize();
-        if (size.getColumns() != oldSize.getColumns()) {
             logger.info("Setting size to: {}x{} from {}x{}",
                         size.getColumns(), size.getRows(),
                         oldSize.getColumns(), oldSize.getRows());
             setPreferredSize(size.withRows(rows));
-        }
         return;
     }
 
@@ -55,8 +68,26 @@ public class FullWidthPanel extends Panel {
         label.setText(String.join(separator, text));
     }
 
-    public void text_output(Integer rows, Integer columns) {
-
+    public void text_output(Integer rows, Integer columns) {}
+    public void update_data() {}
+    public void display_data() {
+        Component target;
+        Component parent = getParent();
+        if (borderClass.isInstance(parent)) {
+            target = (Component)parent;
+        } else {
+            target = (Component)this;
+        }
+        if (data.size() == 0) {
+            target.setVisible(false);
+            return;
+        } else {
+            target.setVisible(true);
+        }
+        removeAllComponents();
+        for (String line : data) {
+            addComponent(new Label(line));
+        }
     }
     
 }

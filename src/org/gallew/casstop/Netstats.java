@@ -5,6 +5,7 @@ import com.googlecode.lanterna.gui2.*;
 import java.lang.Math;
 import java.lang.String;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.time.format.DateTimeFormatter;
 import org.gallew.casstop.Util;
 import org.slf4j.LoggerFactory;
@@ -12,54 +13,26 @@ import org.slf4j.Logger;
 
 public class Netstats extends FullWidthPanel {
     final Logger logger = LoggerFactory.getLogger(Netstats.class);
-    Label title = new Label("");
-    Label rates = new Label("");
-
+    Integer toggle = 0;
+    
     Netstats(CassandraNode the_node, Integer columns) {
         super(the_node, columns);
-        addComponent(title);
-        addComponent(rates);
+        data = new ArrayList<String>();
     }
 
-    public void update() {
-        super.update();
-        update_title();
-        update_rates();
-    }
-
-    private void update_title() {
-        Integer nodesUp = 0;
-        Integer nodesDown = 0;
-        if (node.metrics != null) {
-            nodesUp = node.metrics.nodesUp;
-            nodesDown = node.metrics.nodesDown;
+    public void update_data() {
+        toggle = toggle + 1;
+        logger.info("update_data: toggle={}", toggle);
+        if (toggle < 3) {
+            data.add("more data");
+            return;
         }
-        String[] parts = {
-            String.format("%s:%s(%s)", node.nodename, node.cluster_name, node.cassandra_version),
-            node.metrics.status,
-            String.format("Up: %d  Down: %d",nodesUp, nodesDown),
-            String.format("Last Update: %s", LocalTime.now().format(timeFormatter))};
-        optimize_label(title, parts);
-        logger.debug("Updated time to {}", LocalTime.now().format(timeFormatter));
-    }
-
-    private void update_rates() {
-        String[] parts = {
-            String.format("Reads %3s/s  latency %3s usec",
-                          Util.Humanize(node.metrics.readLatencyOneMinute),
-                          Util.Humanize(node.metrics.readLatency)),
-            String.format("Writes %3s/s  latency %3s usec",
-                          Util.Humanize(node.metrics.writeLatencyOneMinute),
-                          Util.Humanize(node.metrics.writeLatency)),
-            String.format("Pending Tasks: %3d", node.metrics.pendingTasks)
-        };
-        optimize_label(rates, parts);
+        data.clear();
+        toggle = 0;
     }
 
     public void text_output(Integer rows, Integer columns) {
-        System.out.println(title.getText());
-        System.out.println(rates.getText());
-        System.out.println("Rows: " + size.getRows());
-        System.out.println("Columns: " + size.getColumns());
+        for ( String str : data ) 
+            System.out.println(str);
     }
 }
