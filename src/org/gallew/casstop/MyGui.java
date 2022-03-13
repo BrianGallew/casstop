@@ -52,14 +52,16 @@ public class MyGui extends MultiWindowTextGUI {
 
     public void loop() throws java.io.IOException, java.lang.InterruptedException {
         // Run the update loop
+        Integer remainingRows;
         while (true) {
             if (stopping) {
                 ((AsynchronousTextGUIThread)getGUIThread()).stop();
                 break;
             }
             if (node.update()) {
+                remainingRows = tsize.getRows();
                 for ( Component panel : canvas.getChildren())
-                    ((FullWidthPanel)(((Border)panel).getComponent())).update();
+                    remainingRows -= ((FullWidthPanel)(((Border)panel).getComponent())).update(remainingRows);
             }
             sleep(10);
         }
@@ -69,8 +71,9 @@ public class MyGui extends MultiWindowTextGUI {
         screen.stopScreen();
         ((AsynchronousTextGUIThread)getGUIThread()).stop();
         sleep(10);
+        remainingRows = tsize.getRows();
         for ( Component panel : canvas.getChildren())
-            ((FullWidthPanel)(((Border)panel).getComponent())).text_output(tsize.getRows(), tsize.getColumns());
+            remainingRows -= ((FullWidthPanel)(((Border)panel).getComponent())).text_output(remainingRows, tsize.getColumns());
 
     }
 

@@ -24,10 +24,11 @@ public class SummaryPanel extends FullWidthPanel {
         addComponent(rates);
     }
 
-    public void update() {
-        super.update();
+    public Integer update(Integer maxrows) {
+        super.update(maxrows);
         update_title();
         update_rates();
+        return 4;
     }
 
     private void update_title() {
@@ -59,10 +60,11 @@ public class SummaryPanel extends FullWidthPanel {
         optimize_label(rates, parts);
     }
 
-    public void text_output(Integer rows, Integer columns) {
+    public Integer text_output(Integer rows, Integer columns) {
         System.out.println(title.getText());
         System.out.println(rates.getText());
         System.out.println("Rows: " + size.getRows());
         System.out.println("Columns: " + size.getColumns());
+        return 6;
     }
 }

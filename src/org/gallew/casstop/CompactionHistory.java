@@ -2,6 +2,9 @@ package org.gallew.casstop;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.lang.Math;
 import java.lang.String;
 import java.time.LocalTime;
@@ -9,57 +12,38 @@ import java.time.format.DateTimeFormatter;
 import org.gallew.casstop.Util;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import javax.management.openmbean.CompositeDataSupport;
 
 public class CompactionHistory extends FullWidthPanel {
     final Logger logger = LoggerFactory.getLogger(CompactionHistory.class);
-    Label title = new Label("");
-    Label rates = new Label("");
 
     CompactionHistory(CassandraNode the_node, Integer columns) {
         super(the_node, columns);
-        addComponent(title);
-        addComponent(rates);
+        data = new ArrayList<String>();
     }
 
-    public void update() {
-        super.update();
-        update_title();
-        update_rates();
-    }
-
-    private void update_title() {
-        Integer nodesUp = 0;
-        Integer nodesDown = 0;
-        if (node.metrics != null) {
-            nodesUp = node.metrics.nodesUp;
-            nodesDown = node.metrics.nodesDown;
+    public void update_data() {
+        // logger.info("Compaction history keySet: {}", node.metrics.compaction_history.keySet());
+        // logger.info("Compaction history values: {}", node.metrics.compaction_history.values());
+        data.clear();
+        if (node.metrics.compaction_history == null) {
+            return;
         }
-        String[] parts = {
-            String.format("%s:%s(%s)", node.nodename, node.cluster_name, node.cassandra_version),
-            node.metrics.status,
-            String.format("Up: %d  Down: %d",nodesUp, nodesDown),
-            String.format("Last Update: %s", LocalTime.now().format(timeFormatter))};
-        optimize_label(title, parts);
-        logger.debug("Updated time to {}", LocalTime.now().format(timeFormatter));
-    }
-
-    private void update_rates() {
-        String[] parts = {
-            String.format("Reads %3s/s  latency %3s usec",
-                          Util.Humanize(node.metrics.readLatencyOneMinute),
-                          Util.Humanize(node.metrics.readLatency)),
-            String.format("Writes %3s/s  latency %3s usec",
-                          Util.Humanize(node.metrics.writeLatencyOneMinute),
-                          Util.Humanize(node.metrics.writeLatency)),
-            String.format("Pending Tasks: %3d", node.metrics.pendingTasks)
-        };
-        optimize_label(rates, parts);
-    }
-
-    public void text_output(Integer rows, Integer columns) {
-        System.out.println(title.getText());
-        System.out.println(rates.getText());
-        System.out.println("Rows: " + size.getRows());
-        System.out.println("Columns: " + size.getColumns());
+        ArrayList<CompactionHistoryDatum> history = new ArrayList<CompactionHistoryDatum>();
+        Integer maxKeyLen = 0;
+        Integer maxColLen = 0;
+        Integer maxWidth = Math.max(getSize().getColumns() - 2, 20);
+        logger.info("update_data: maxWidth set to {}", maxWidth);
+        for (CompositeDataSupport entry : (Collection<CompositeDataSupport>)node.metrics.compaction_history.values()) {
+            CompactionHistoryDatum datum = new CompactionHistoryDatum(entry);
+            maxKeyLen = Math.max(datum.keyLength(), maxKeyLen);
+            maxColLen = Math.max(datum.colLength(), maxColLen);
+            if (!datum.keyspace_name.startsWith("system") || node.include_system)
+                history.add(datum);
+        }
+        Collections.sort(history);
+        for (CompactionHistoryDatum datum : history)
+            data.add(datum.format(maxKeyLen, maxColLen, maxWidth));
+        logger.info("update_data: produced {} rows of {}", data.size(), node.metrics.compaction_history.size());
     }
 }

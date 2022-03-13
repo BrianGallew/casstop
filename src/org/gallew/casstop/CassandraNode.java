@@ -10,6 +10,7 @@ public class CassandraNode {
     JMXConnection conn;
     String nodename;
     String port;
+    boolean include_system;
     // Metrics
     String cassandra_version;
     String cluster_name;
@@ -22,6 +23,7 @@ public class CassandraNode {
         nodename = config.nodename;
         port = config.port;
         update_delay_in_ms = config.update_delay;
+        include_system = config.system;
         last_update = new Date().getTime() - update_delay_in_ms;
         conn = new JMXConnection(nodename, port);
         if (!conn.alive) {

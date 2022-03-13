@@ -39,22 +39,21 @@ public class FullWidthPanel extends Panel {
         setPreferredSize(size);
     }
 
-    public void update() {
+    public Integer update(Integer maxrows) {
         if (data != null) {
             update_data();
-            display_data();
-            rows = data.size();
+            rows = display_data(maxrows-2);
         }
         size = getParent().getSize().withRows(rows);
         if (size.getColumns() == 0)
-            return;
+            return rows;
         size = size.withColumns(size.getColumns() -2);
         TerminalSize oldSize = getSize();
             logger.info("Setting size to: {}x{} from {}x{}",
                         size.getColumns(), size.getRows(),
                         oldSize.getColumns(), oldSize.getRows());
             setPreferredSize(size.withRows(rows));
-        return;
+        return rows+2;
     }
 
     public void optimize_label(Label label, String[] text) {
@@ -68,20 +67,26 @@ public class FullWidthPanel extends Panel {
         label.setText(String.join(separator, text));
     }
 
-    public void text_output(Integer rows, Integer columns) {
+    public Integer text_output(Integer rows, Integer columns) {
+        Integer returnValue = 0;
         if (data != null) {
             System.out.println();
-            for ( String str : data ) 
+            returnValue = 1;
+            for ( String str : data ) {
                 System.out.println(str);
+                returnValue += 1;
+            }
         }
+        return returnValue;
     }
 
     public void update_data() {}
 
-    public void display_data() {
+    public Integer display_data(Integer maxrows) {
         Component target;
         Component parent = getParent();
         removeAllComponents();
+        Integer count = 0;
         // Find the component to make invisible.  If we were wrapped with a Border, use the Border.
         if (borderClass.isInstance(parent)) {
             target = (Component)parent;
@@ -91,13 +96,19 @@ public class FullWidthPanel extends Panel {
         // No data?  Don't display anything, including the bounding box
         if (data.size() == 0) {
             target.setVisible(false);
-            return;
+            return 0;
         } else {
             target.setVisible(true);
         }
         for (String line : data) {
-            addComponent(new Label(line));
+            if (count < maxrows) {
+                addComponent(new Label(line));
+                count += 1;
+            } else {
+                break;
+            }
         }
+        return count;
     }
     
 }

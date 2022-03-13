@@ -6,6 +6,7 @@ public class Config {
     String nodename = "localhost";
     String port = "7199";
     Integer update_delay = 5000; // 5 seconds (in milliseconds)
+    boolean system = false;
 
     public Config(String[] args) {
         
@@ -14,6 +15,7 @@ public class Config {
         options.addOption("H", "host", true, "Cassandra node name/address");
         options.addOption("p", "port", true, "JMX port");
         options.addOption("u", "update", true, "Delay between updates in seconds");
+        options.addOption("i", "include-system", false, "Include system compactions");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine line;
@@ -35,6 +37,9 @@ public class Config {
             }
             if (line.hasOption("port")) {
                 port = line.getOptionValue("port");
+            }
+            if (line.hasOption("include-system")) {
+                system = true;
             }
         } catch (ParseException exp) {
             // oops, something went wrong
