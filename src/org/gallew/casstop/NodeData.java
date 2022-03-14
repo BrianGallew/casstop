@@ -22,7 +22,6 @@ public class NodeData {
     public Integer nodesUp = 0;
     public Integer nodesDown = 0;
     public TabularData compaction_history;
-    public ArrayList compaction_summary;
     public ArrayList compactions;
 
     public NodeData(JMXConnection conn) throws java.io.IOException {
@@ -39,8 +38,6 @@ public class NodeData {
         nodesUp = conn.getInteger("org.apache.cassandra.net:type=FailureDetector", "UpEndpointCount");
         nodesDown = conn.getInteger("org.apache.cassandra.net:type=FailureDetector", "DownEndpointCount");
         current_streams = conn.getSet("org.apache.cassandra.net:type=StreamManager","CurrentStreams");
-        compaction_summary = conn.getList("org.apache.cassandra.db:type=CompactionManager","CompactionSummary");
-        // Compaction@23688c90-9768-11ec-93db-11ffd(keyspace1, standard1, 111357/427817883)bytes
         compactions = conn.getList("org.apache.cassandra.db:type=CompactionManager","Compactions");
         // {keyspace=keyspace1, total=427817883, taskType=Compaction, unit=bytes, id=23688c90-9768-11ec-93db-11ffd, completed=111357, compactionId=23688c90-9768-11ec-93db-11ffd, columnfamily=standard1}
         compaction_history = conn.getTabularData("org.apache.cassandra.db:type=CompactionManager","CompactionHistory");
