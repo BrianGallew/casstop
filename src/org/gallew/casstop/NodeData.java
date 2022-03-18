@@ -39,7 +39,6 @@ public class NodeData {
         nodesDown = conn.getInteger("org.apache.cassandra.net:type=FailureDetector", "DownEndpointCount");
         current_streams = conn.getSet("org.apache.cassandra.net:type=StreamManager","CurrentStreams");
         compactions = conn.getList("org.apache.cassandra.db:type=CompactionManager","Compactions");
-        // {keyspace=keyspace1, total=427817883, taskType=Compaction, unit=bytes, id=23688c90-9768-11ec-93db-11ffd, completed=111357, compactionId=23688c90-9768-11ec-93db-11ffd, columnfamily=standard1}
         compaction_history = conn.getTabularData("org.apache.cassandra.db:type=CompactionManager","CompactionHistory");
     }
 }
