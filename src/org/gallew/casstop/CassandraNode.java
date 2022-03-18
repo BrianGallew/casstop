@@ -39,13 +39,15 @@ public class CassandraNode {
         if ((start_time-last_update) < update_delay_in_ms) {
             return false;
         }
-        logger.info("attempting update");
+        logger.debug("attempting update");
         if (!conn.alive) {      // Ensure we didn't lose our connection while sleeping
            conn = new JMXConnection(nodename, port);
         }
         try {
-            metrics = new NodeData(conn);
+            NodeData new_metrics = new NodeData(conn);
+            metrics = new_metrics;
         } catch (java.io.IOException the_exception) {
+            logger.warn("Unable to load metrics via JMX");
             return false;
         }
             

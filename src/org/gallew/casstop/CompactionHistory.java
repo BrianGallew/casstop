@@ -23,27 +23,27 @@ public class CompactionHistory extends FullWidthPanel {
     }
 
     public void update_data() {
-        // logger.info("Compaction history keySet: {}", node.metrics.compaction_history.keySet());
-        // logger.info("Compaction history values: {}", node.metrics.compaction_history.values());
         data.clear();
         if (node.metrics.compaction_history == null) {
             return;
         }
         ArrayList<CompactionHistoryDatum> history = new ArrayList<CompactionHistoryDatum>();
-        Integer maxKeyLen = 0;
-        Integer maxColLen = 0;
         Integer maxWidth = Math.max(getSize().getColumns() - 2, 20);
-        logger.info("update_data: maxWidth set to {}", maxWidth);
+        logger.debug("update_data: maxWidth set to {}", maxWidth);
+        CompactionHistoryDatum datum = new CompactionHistoryDatum();
+        Integer maxKeyLen = datum.keyLength();
+        Integer maxColLen = datum.colLength();
+        history.add(datum);
         for (CompositeDataSupport entry : (Collection<CompositeDataSupport>)node.metrics.compaction_history.values()) {
-            CompactionHistoryDatum datum = new CompactionHistoryDatum(entry);
+            datum = new CompactionHistoryDatum(entry);
             maxKeyLen = Math.max(datum.keyLength(), maxKeyLen);
             maxColLen = Math.max(datum.colLength(), maxColLen);
             if (!datum.keyspace_name.startsWith("system") || node.include_system)
                 history.add(datum);
         }
         Collections.sort(history);
-        for (CompactionHistoryDatum datum : history)
-            data.add(datum.format(maxKeyLen, maxColLen, maxWidth));
-        logger.info("update_data: produced {} rows of {}", data.size(), node.metrics.compaction_history.size());
+        for (CompactionHistoryDatum datum2 : history)
+            data.add(datum2.format(maxKeyLen, maxColLen, maxWidth));
+        logger.debug("update_data: produced {} rows of {}", data.size(), node.metrics.compaction_history.size());
     }
 }

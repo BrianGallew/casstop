@@ -1,14 +1,18 @@
 package org.gallew.casstop;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import javax.management.openmbean.TabularData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extracts data via JMX.
  */
 public class NodeData {
+    final Logger logger = LoggerFactory.getLogger(SummaryPanel.class);
     public Long load = 0L;
     public Integer pendingTasks = 0;
     public Long totalHints = 0L;
@@ -25,7 +29,7 @@ public class NodeData {
     public ArrayList compactions;
 
     public NodeData(JMXConnection conn) throws java.io.IOException {
-
+        Long startTime = Instant.now().toEpochMilli();
         status = conn.getString("org.apache.cassandra.db:type=StorageService", "OperationMode");
         load = conn.getLong("org.apache.cassandra.metrics:type=Storage,name=Load", "Count");
         totalHints = conn.getLong("org.apache.cassandra.metrics:type=Storage,name=TotalHints", "Count");
@@ -40,5 +44,7 @@ public class NodeData {
         current_streams = conn.getSet("org.apache.cassandra.net:type=StreamManager","CurrentStreams");
         compactions = conn.getList("org.apache.cassandra.db:type=CompactionManager","Compactions");
         compaction_history = conn.getTabularData("org.apache.cassandra.db:type=CompactionManager","CompactionHistory");
+        Long endTime = Instant.now().toEpochMilli();
+        logger.info("Time to load data: {}ms", endTime-startTime);
     }
 }

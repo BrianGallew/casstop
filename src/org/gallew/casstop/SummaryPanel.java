@@ -10,9 +10,6 @@ import org.gallew.casstop.Util;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-/**
- * Created by begallew on 5/4/16.
- */
 public class SummaryPanel extends FullWidthPanel {
     final Logger logger = LoggerFactory.getLogger(SummaryPanel.class);
     Label title = new Label("");

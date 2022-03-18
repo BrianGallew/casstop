@@ -78,10 +78,10 @@ public class MyGui extends MultiWindowTextGUI {
     }
 
     public boolean handleInput​(KeyStroke key) {
-        logger.warn("handling keystroke {}", key);
+        logger.info("handling keystroke {}", key);
         Character character = key.getCharacter();
         if (character != null && character == 'q') {
-            logger.warn("Got a q, exiting");
+            logger.info("Got a q, exiting");
             stopping = true;
             return true;
         }

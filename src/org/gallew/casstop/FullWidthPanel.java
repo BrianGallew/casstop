@@ -49,9 +49,9 @@ public class FullWidthPanel extends Panel {
             return rows;
         size = size.withColumns(size.getColumns() -2);
         TerminalSize oldSize = getSize();
-            logger.info("Setting size to: {}x{} from {}x{}",
-                        size.getColumns(), size.getRows(),
-                        oldSize.getColumns(), oldSize.getRows());
+            logger.debug("Setting size to: {}x{} from {}x{}",
+                         size.getColumns(), size.getRows(),
+                         oldSize.getColumns(), oldSize.getRows());
             setPreferredSize(size.withRows(rows));
         return rows+2;
     }
