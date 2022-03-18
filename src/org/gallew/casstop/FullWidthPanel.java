@@ -75,6 +75,8 @@ public class FullWidthPanel extends Panel {
             for ( String str : data ) {
                 System.out.println(str);
                 returnValue += 1;
+                if (returnValue >= rows)
+                    break;
             }
         }
         return returnValue;
